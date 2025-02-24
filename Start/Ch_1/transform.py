@@ -25,9 +25,24 @@ def toGrade(x):
 nums = (1, 8, 4, 5, 13, 26, 381, 410, 58, 47)
 grades = (81, 89, 94, 78, 61, 66, 99, 74)
 
+#            ------------| 
+#            |           V
+# list(map(squareFunc, nums))    # using array.map(f, iterable), apply squareFunc() on each member of iterable nums
+
 # TODO: use map to create a new sequence of values
+# nums->squares
+# use map to create a new sequence of values
+squares = list(map(squareFunc, nums))
+print(squares)  # [1, 64, 16, 25, 169, 676, 145161, 168100, 3364, 2209]
 
 # TODO: use sorted and map to change numbers to grades
+#grades = list(map(toGrade, nums))
+#print(grades) # OUT: ['F', 'F', 'F', 'F', 'F', 'F', 'A', 'A', 'F', 'F']
+
+# use sorted and map to change numbers to grades
+grades = sorted(grades) ; print(f"grades: {grades}")  # grades: [61, 66, 74, 78, 81, 89, 94, 99]
+letters = list(map(toGrade, grades))
+print(letters) # ['F', 'D', 'C', 'C', 'B', 'B', 'A', 'A']    F=fail, grades: A, B, C, D
 
 # Use the filter on our data - let's filter out all seismic events that were *not* quakes
 # open the data file and load the JSON
@@ -40,6 +55,44 @@ grades = (81, 89, 94, 78, 61, 66, 99, 74)
 #     return q['properties']['mag'] is not None and q['properties']['mag'] >= 6
 
 
-# results = list(filter(bigmag, data['features']))
+
 
 # TODO: transform the largest events into a simpler structure
+
+# Use the filter on our data - let's filter out all seismic events that were *not* quakes
+# open the data file and load the JSON
+with open("../../30DayQuakes.json", "r") as datafile:
+    data = json.load(datafile)
+
+
+# filter the data down to the largest events
+def bigmag(q):
+    return q['properties']['mag'] is not None and q['properties']['mag'] >= 6
+
+# results = list(filter(bigmag, data['features']))
+results = list(filter(bigmag, data['features']))
+
+import datetime
+# transform the largest events into a simpler structure
+def simplify(q):
+    return {
+        "place": q['properties']['place'],
+        "magnitude": q['properties']['mag'],
+        "date": str(datetime.date.fromtimestamp(q['properties']["time"]/1000))
+    }
+
+
+results = list(map(simplify, results))
+pprint.pp(results, indent=2)
+# OUT:
+# [ { 'place': '246km S of Kangin, Indonesia',
+#     'magnitude': 6.2,
+#     'date': '2020-03-18'},
+#   { 'place': '97km NNW of Sola, Vanuatu',
+#     'magnitude': 6.1,
+#     'date': '2020-03-18'},
+#   {'place': '172km E of Hihifo, Tonga', 'magnitude': 6, 'date': '2020-03-17'},
+#   { 'place': '298km NE of Raoul Island, New Zealand',
+#     'magnitude': 6.3,
+#     'date': '2020-03-14'},
+#   {'place': '24km SE of Saray, Turkey', 'magnitude': 6, 'date': '2020-02-23'}]
